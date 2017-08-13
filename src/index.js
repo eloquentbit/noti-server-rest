@@ -3,7 +3,7 @@ import env from './config/config'
 import express from 'express'
 import bodyParser from 'body-parser'
 
-import mongoose from './db/mongoose'
+import db from './db/mongoose'
 
 const PORT = env.PORT || 8080
 
