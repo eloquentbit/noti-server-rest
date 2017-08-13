@@ -1,4 +1,4 @@
-import env from './config/config'
+import { env, logger } from './config/config'
 
 import express from 'express'
 import bodyParser from 'body-parser'
@@ -24,5 +24,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  logger.info(`Server running on port ${PORT}`)
 })
