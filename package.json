@@ -17,7 +17,8 @@
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
     "mongoose": "^4.11.5",
-    "rimraf": "^2.6.1"
+    "rimraf": "^2.6.1",
+    "yenv": "^1.0.6"
   },
   "devDependencies": {
     "babel-core": "^6.25.0",
