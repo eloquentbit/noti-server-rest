@@ -20,6 +20,7 @@
     "mongoose": "^4.11.5",
     "morgan": "^1.8.2",
     "rimraf": "^2.6.1",
+    "winston": "^2.3.1",
     "yenv": "^1.0.6"
   },
   "devDependencies": {
