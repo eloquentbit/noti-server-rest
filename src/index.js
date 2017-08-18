@@ -4,7 +4,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
 
-import db from './db/mongoose'
+import './db/mongoose'
 
 const PORT = env.PORT || 8080
 
