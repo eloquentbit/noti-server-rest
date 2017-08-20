@@ -51,4 +51,19 @@ describe('POST /notes', () => {
           .catch(e => done(e))
       })
   })
+
+  it('should not create a note with invalid body data', done => {
+    request(app).post('/notes').send({}).expect(400).end((err, res) => {
+      if (err) {
+        return done(err)
+      }
+
+      Note.find()
+        .then(notes => {
+          expect(notes.length).toBe(0)
+          done()
+        })
+        .catch(e => done(e))
+    })
+  })
 })
