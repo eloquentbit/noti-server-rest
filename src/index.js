@@ -25,6 +25,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Server Ready' })
 })
 
+// POST /notes
 app.post('/notes', (req, res) => {
   const note = new Note({
     content: req.body.content
@@ -33,6 +34,18 @@ app.post('/notes', (req, res) => {
   note.save().then(
     doc => {
       res.json(doc)
+    },
+    err => {
+      res.status(400).send(err)
+    }
+  )
+})
+
+// GET /notes
+app.get('/notes', (req, res) => {
+  Note.find({}).then(
+    notes => {
+      res.json({ notes })
     },
     err => {
       res.status(400).send(err)
