@@ -9,7 +9,7 @@
     "clean": "rimraf dist",
     "build": "npm run clean && mkdir -p dist && babel src -s -D -d dist",
     "eslint-check": "eslint --print-config .eslintrc.js | eslint-config-prettier-check",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "export NODE_ENV=test && mocha --compilers js:babel-core/register src/**/*.test.js"
   },
   "author": "Luca Peduto",
   "license": "MIT",
