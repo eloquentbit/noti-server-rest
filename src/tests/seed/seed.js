@@ -24,4 +24,4 @@ const populateNotes = done => {
     .then(() => done())
 }
 
-export { populateNotes }
+export { notes, populateNotes }
