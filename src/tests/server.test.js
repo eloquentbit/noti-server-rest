@@ -1,4 +1,5 @@
 /* eslint-env mocha */
+/* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
 
 import expect from 'expect'
 import request from 'supertest'
@@ -6,7 +7,7 @@ import winston from 'winston'
 
 import { app } from './../index'
 import Note from './../models/note'
-import { populateNotes } from './seed/seed'
+import { notes as testNotes, populateNotes } from './seed/seed'
 import { logger } from './../config/config'
 
 logger.remove(winston.transports.Console)
@@ -74,6 +75,18 @@ describe('GET /notes', () => {
       .expect(200)
       .expect(res => {
         expect(res.body.notes.length).toBe(2)
+      })
+      .end(done)
+  })
+})
+
+describe('GET /notes/:id', () => {
+  it('should return a note doc', done => {
+    request(app)
+      .get(`/notes/${testNotes[0]._id.toHexString()}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.body.note.content).toBe(testNotes[0].content)
       })
       .end(done)
   })
