@@ -3,6 +3,7 @@ import { env, logger } from './config/config'
 import express from 'express'
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
+import { ObjectID } from 'mongodb'
 
 import './db/mongoose'
 
@@ -51,6 +52,27 @@ app.get('/notes', (req, res) => {
       res.status(400).send(err)
     }
   )
+})
+
+// GET /notes/:id
+app.get('/notes/:id', (req, res) => {
+  const { id } = req.params
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(400).send()
+  }
+
+  Note.findOne({ _id: id })
+    .then(note => {
+      if (!note) {
+        return res.status(404).send()
+      }
+
+      res.json({ note })
+    })
+    .catch(err => {
+      res.status(400).send(err)
+    })
 })
 
 app.listen(PORT, () => {
