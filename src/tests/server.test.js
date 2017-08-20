@@ -6,13 +6,12 @@ import winston from 'winston'
 
 import { app } from './../index'
 import Note from './../models/note'
+import { populateNotes } from './seed/seed'
 import { logger } from './../config/config'
 
 logger.remove(winston.transports.Console)
 
-beforeEach(done => {
-  Note.remove({}).then(() => done())
-})
+beforeEach(populateNotes)
 
 describe('GET /', () => {
   it('should respond with message `Server Ready`', done => {
@@ -28,7 +27,7 @@ describe('GET /', () => {
 
 describe('POST /notes', () => {
   it('should create a new note', done => {
-    const content = '# Note title\nFirst note'
+    const content = '# Note title'
 
     request(app)
       .post('/notes')
@@ -60,10 +59,22 @@ describe('POST /notes', () => {
 
       Note.find()
         .then(notes => {
-          expect(notes.length).toBe(0)
+          expect(notes.length).toBe(2)
           done()
         })
         .catch(e => done(e))
     })
+  })
+})
+
+describe('GET /notes', () => {
+  it('should get all notes', done => {
+    request(app)
+      .get('/notes')
+      .expect(200)
+      .expect(res => {
+        expect(res.body.notes.length).toBe(2)
+      })
+      .end(done)
   })
 })
