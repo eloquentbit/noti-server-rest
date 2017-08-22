@@ -2,6 +2,7 @@ import { env, logger } from './config/config'
 
 import express from 'express'
 import bodyParser from 'body-parser'
+import cors from 'cors'
 import morgan from 'morgan'
 import { ObjectID } from 'mongodb'
 
@@ -13,6 +14,7 @@ const PORT = env.PORT || 8080
 
 const app = express()
 
+app.use(cors())
 app.use(
   morgan('dev', {
     skip: () => app.get('env') === 'test'
