@@ -77,6 +77,26 @@ app.get('/notes/:id', (req, res) => {
     })
 })
 
+// DELETE /notes/:id
+app.delete('/notes/:id', (req, res) => {
+  const { id } = req.params
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send()
+  }
+
+  Note.findOneAndRemove({ _id: id })
+    .then(note => {
+      if (!note) {
+        return res.status(404).send()
+      }
+      res.json({ note })
+    })
+    .catch(e => {
+      res.status(400).send()
+    })
+})
+
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`)
 })
