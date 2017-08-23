@@ -5,6 +5,7 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 import morgan from 'morgan'
 import { ObjectID } from 'mongodb'
+import _ from 'lodash'
 
 import './db/mongoose'
 
@@ -94,6 +95,27 @@ app.delete('/notes/:id', (req, res) => {
     })
     .catch(e => {
       res.status(400).send()
+    })
+})
+
+app.patch('/notes/:id', (req, res) => {
+  const { id } = req.params
+  const body = _.pick(req.body, ['content', 'public'])
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send()
+  }
+
+  Note.findOneAndUpdate({ _id: id }, { $set: body }, { new: true })
+    .then(note => {
+      if (!note) {
+        return res.status(404).send()
+      }
+
+      res.json({ note })
+    })
+    .catch(e => {
+      res.send(400).send()
     })
 })
 
