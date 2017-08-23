@@ -4,6 +4,7 @@
 import expect from 'expect'
 import request from 'supertest'
 import winston from 'winston'
+import { ObjectID } from 'mongodb'
 
 import { app } from './../index'
 import Note from './../models/note'
@@ -89,6 +90,12 @@ describe('GET /notes/:id', () => {
         expect(res.body.note.content).toBe(testNotes[0].content)
       })
       .end(done)
+  })
+
+  it('should return 404 if note is not found', done => {
+    const hexId = new ObjectID().toHexString()
+
+    request(app).get(`/notes/${hexId}`).expect(404).end(done)
   })
 
   it('should return 404 if invalid `id` is sent', done => {
