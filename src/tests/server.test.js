@@ -90,4 +90,9 @@ describe('GET /notes/:id', () => {
       })
       .end(done)
   })
+
+  it('should return 404 if invalid `id` is sent', done => {
+    const invalidID = 'abc'
+    request(app).get(`/notes/${invalidID}`).expect(404).end(done)
+  })
 })
