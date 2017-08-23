@@ -98,8 +98,44 @@ describe('GET /notes/:id', () => {
     request(app).get(`/notes/${hexId}`).expect(404).end(done)
   })
 
-  it('should return 404 if invalid `id` is sent', done => {
+  it('should return 404 if object id is invalid', done => {
     const invalidID = 'abc'
     request(app).get(`/notes/${invalidID}`).expect(404).end(done)
+  })
+})
+
+describe('DELETE /notes/:id', () => {
+  it('should remove a note', done => {
+    const hexId = testNotes[0]._id.toHexString()
+
+    request(app)
+      .delete(`/notes/${hexId}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.body.note._id).toBe(hexId)
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err)
+        }
+
+        Note.findById(hexId)
+          .then(note => {
+            expect(note).toNotExist()
+            done()
+          })
+          .catch(e => done(e))
+      })
+  })
+
+  it('should return 404 if note not found', done => {
+    const hexId = new ObjectID().toHexString()
+
+    request(app).delete(`/notes/${hexId}`).expect(404).end(done)
+  })
+
+  it('should return 404 if object id is invalid', done => {
+    const invalidID = 'abc'
+    request(app).delete(`/notes/${invalidID}`).expect(404).end(done)
   })
 })
