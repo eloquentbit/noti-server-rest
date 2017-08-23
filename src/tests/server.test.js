@@ -139,3 +139,34 @@ describe('DELETE /notes/:id', () => {
     request(app).delete(`/notes/${invalidID}`).expect(404).end(done)
   })
 })
+
+describe('PATCH /notes/:id', () => {
+  it('should update the note', done => {
+    const hexId = testNotes[0]._id.toHexString()
+    const updatedNote = {
+      content: 'Updated content',
+      public: true
+    }
+
+    request(app)
+      .patch(`/notes/${hexId}`)
+      .send(updatedNote)
+      .expect(200)
+      .expect(res => {
+        expect(res.body.note.content).toBe(updatedNote.content)
+        expect(res.body.note.public).toBe(true)
+      })
+      .end(done)
+  })
+
+  it('should return 404 if object id is invalid', done => {
+    const invalidID = 'abc'
+    request(app).patch(`/notes/${invalidID}`).expect(404).end(done)
+  })
+
+  it('should return 404 if note not found', done => {
+    const hexId = new ObjectID().toHexString()
+
+    request(app).patch(`/notes/${hexId}`).expect(404).end(done)
+  })
+})
