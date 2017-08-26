@@ -44,7 +44,7 @@ const users = [
       {
         access: 'auth',
         token: jwt
-          .sign({ _id: userOneId, access: 'auth' }, env.JWT_SECRET)
+          .sign({ _id: userTwoId, access: 'auth' }, env.JWT_SECRET)
           .toString()
       }
     ]
