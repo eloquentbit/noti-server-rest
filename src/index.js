@@ -10,6 +10,7 @@ import _ from 'lodash'
 import './db/mongoose'
 
 import Note from './models/note'
+import { User } from './models/user'
 
 const PORT = env.PORT || 8080
 
@@ -98,6 +99,7 @@ app.delete('/notes/:id', (req, res) => {
     })
 })
 
+// PATCH /notes/:id
 app.patch('/notes/:id', (req, res) => {
   const { id } = req.params
   const body = _.pick(req.body, ['content', 'public'])
@@ -117,6 +119,22 @@ app.patch('/notes/:id', (req, res) => {
     .catch(e => {
       res.send(400).send()
     })
+})
+
+// POST /users
+app.post('/users', (req, res) => {
+  const body = _.pick(req.body, ['email', 'password'])
+  const user = new User(body)
+
+  user
+    .save()
+    .then(() => {
+      return user.generateAuthToken()
+    })
+    .then(token => {
+      res.header('x-auth', token).send(user)
+    })
+    .catch(err => res.status(400).send(err))
 })
 
 app.listen(PORT, () => {
