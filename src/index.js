@@ -11,6 +11,7 @@ import './db/mongoose'
 
 import Note from './models/note'
 import { User } from './models/user'
+import { authenticate } from './middleware/authenticate'
 
 const PORT = env.PORT || 8080
 
@@ -139,6 +140,11 @@ app.post('/users', (req, res) => {
 
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`)
+})
+
+// GET /users/me
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user)
 })
 
 export { app }
