@@ -8,12 +8,19 @@ import { ObjectID } from 'mongodb'
 
 import { app } from './../index'
 import Note from './../models/note'
-import { notes as testNotes, populateNotes } from './seed/seed'
+import { User } from './../models/user'
+import {
+  notes as testNotes,
+  populateNotes,
+  users,
+  populateUsers
+} from './seed/seed'
 import { logger } from './../config/config'
 
 logger.remove(winston.transports.Console)
 
 beforeEach(populateNotes)
+beforeEach(populateUsers)
 
 describe('GET /', () => {
   it('should respond with message `Server Ready`', done => {
@@ -168,5 +175,49 @@ describe('PATCH /notes/:id', () => {
     const hexId = new ObjectID().toHexString()
 
     request(app).patch(`/notes/${hexId}`).expect(404).end(done)
+  })
+})
+
+describe('POST /users', () => {
+  it('should create a user', done => {
+    const email = 'example@example.com'
+    const password = '123mnb!'
+
+    request(app)
+      .post('/users')
+      .send({ email, password })
+      .expect(200)
+      .expect(res => {
+        expect(res.headers['x-auth']).toExist()
+        expect(res.body._id).toExist()
+        expect(res.body.email).toBe(email)
+      })
+      .end(err => {
+        if (err) {
+          return done(err)
+        }
+
+        User.findOne({ email })
+          .then(user => {
+            expect(user).toExist()
+            expect(user.password).toNotBe(password)
+            done()
+          })
+          .catch(e => done(e))
+      })
+  })
+
+  it('should return 400 if request is invalid', done => {
+    const email = 'invalidemail'
+    const password = '123mnb!'
+
+    request(app).post('/users').send({ email, password }).expect(400).end(done)
+  })
+
+  it('should not create user if email is in use', done => {
+    const email = users[0].email
+    const password = 'abc123!'
+
+    request(app).post('/users').send({ email, password }).expect(400).end(done)
   })
 })
