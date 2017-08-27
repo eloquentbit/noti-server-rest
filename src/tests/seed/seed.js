@@ -1,8 +1,9 @@
+/* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
 import { env } from './../../config/config'
 import { ObjectID } from 'mongodb'
 import jwt from 'jsonwebtoken'
 
-import Note from './../../models/note'
+import { Note } from './../../models/note'
 import { User } from './../../models/user'
 
 const noteOneId = new ObjectID()
@@ -14,11 +15,13 @@ const userTwoId = new ObjectID()
 const notes = [
   {
     _id: noteOneId,
-    content: '# First Note'
+    content: '# First Note',
+    _creator: userOneId
   },
   {
     _id: noteTwoId,
-    content: '# Second Note'
+    content: '# Second Note',
+    _creator: userTwoId
   }
 ]
 
