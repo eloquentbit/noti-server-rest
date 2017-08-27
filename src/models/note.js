@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 const NoteSchema = new mongoose.Schema({
   content: {
@@ -9,9 +9,13 @@ const NoteSchema = new mongoose.Schema({
   public: {
     type: Boolean,
     default: false
+  },
+  _creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
   }
 })
 
 const Note = mongoose.model('Note', NoteSchema)
 
-export default Note
+export { Note }
