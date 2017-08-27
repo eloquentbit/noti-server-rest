@@ -7,7 +7,7 @@ import winston from 'winston'
 import { ObjectID } from 'mongodb'
 
 import { app } from './../index'
-import Note from './../models/note'
+import { Note } from './../models/note'
 import { User } from './../models/user'
 import {
   notes as testNotes,
@@ -40,6 +40,7 @@ describe('POST /notes', () => {
 
     request(app)
       .post('/notes')
+      .set('x-auth', users[0].tokens[0].token)
       .send({ content })
       .expect(200)
       .expect(res => {
@@ -61,18 +62,23 @@ describe('POST /notes', () => {
   })
 
   it('should not create a note with invalid body data', done => {
-    request(app).post('/notes').send({}).expect(400).end((err, res) => {
-      if (err) {
-        return done(err)
-      }
+    request(app)
+      .post('/notes')
+      .set('x-auth', users[0].tokens[0].token)
+      .send({})
+      .expect(400)
+      .end((err, res) => {
+        if (err) {
+          return done(err)
+        }
 
-      Note.find()
-        .then(notes => {
-          expect(notes.length).toBe(2)
-          done()
-        })
-        .catch(e => done(e))
-    })
+        Note.find()
+          .then(notes => {
+            expect(notes.length).toBe(2)
+            done()
+          })
+          .catch(e => done(e))
+      })
   })
 })
 
@@ -80,9 +86,10 @@ describe('GET /notes', () => {
   it('should get all notes', done => {
     request(app)
       .get('/notes')
+      .set('x-auth', users[0].tokens[0].token)
       .expect(200)
       .expect(res => {
-        expect(res.body.notes.length).toBe(2)
+        expect(res.body.notes.length).toBe(1)
       })
       .end(done)
   })
@@ -92,6 +99,7 @@ describe('GET /notes/:id', () => {
   it('should return a note doc', done => {
     request(app)
       .get(`/notes/${testNotes[0]._id.toHexString()}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(200)
       .expect(res => {
         expect(res.body.note.content).toBe(testNotes[0].content)
@@ -99,15 +107,31 @@ describe('GET /notes/:id', () => {
       .end(done)
   })
 
+  it('should not return note created by other user', done => {
+    request(app)
+      .get(`/notes/${testNotes[1]._id.toHexString()}`)
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(404)
+      .end(done)
+  })
+
   it('should return 404 if note is not found', done => {
     const hexId = new ObjectID().toHexString()
 
-    request(app).get(`/notes/${hexId}`).expect(404).end(done)
+    request(app)
+      .get(`/notes/${hexId}`)
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(404)
+      .end(done)
   })
 
   it('should return 404 if object id is invalid', done => {
     const invalidID = 'abc'
-    request(app).get(`/notes/${invalidID}`).expect(404).end(done)
+    request(app)
+      .get(`/notes/${invalidID}`)
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(404)
+      .end(done)
   })
 })
 
@@ -117,6 +141,7 @@ describe('DELETE /notes/:id', () => {
 
     request(app)
       .delete(`/notes/${hexId}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(200)
       .expect(res => {
         expect(res.body.note._id).toBe(hexId)
@@ -135,15 +160,44 @@ describe('DELETE /notes/:id', () => {
       })
   })
 
+  it('should not remove a note created by other user', done => {
+    const hexId = testNotes[0]._id.toHexString()
+
+    request(app)
+      .delete(`/notes/${hexId}`)
+      .set('x-auth', users[1].tokens[0].token)
+      .expect(404)
+      .end((err, res) => {
+        if (err) {
+          return done(err)
+        }
+
+        Note.findById(hexId)
+          .then(note => {
+            expect(note).toExist()
+            done()
+          })
+          .catch(e => done(e))
+      })
+  })
+
   it('should return 404 if note not found', done => {
     const hexId = new ObjectID().toHexString()
 
-    request(app).delete(`/notes/${hexId}`).expect(404).end(done)
+    request(app)
+      .delete(`/notes/${hexId}`)
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(404)
+      .end(done)
   })
 
   it('should return 404 if object id is invalid', done => {
     const invalidID = 'abc'
-    request(app).delete(`/notes/${invalidID}`).expect(404).end(done)
+    request(app)
+      .delete(`/notes/${invalidID}`)
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(404)
+      .end(done)
   })
 })
 
@@ -157,6 +211,7 @@ describe('PATCH /notes/:id', () => {
 
     request(app)
       .patch(`/notes/${hexId}`)
+      .set('x-auth', users[0].tokens[0].token)
       .send(updatedNote)
       .expect(200)
       .expect(res => {
@@ -166,15 +221,37 @@ describe('PATCH /notes/:id', () => {
       .end(done)
   })
 
+  it('should not update a note created by other user', done => {
+    const hexId = testNotes[0]._id.toHexString()
+    const updatedNote = {
+      content: '# Content updated'
+    }
+
+    request(app)
+      .patch(`/notes/${hexId}`)
+      .set('x-auth', users[1].tokens[0].token)
+      .send(updatedNote)
+      .expect(404)
+      .end(done)
+  })
+
   it('should return 404 if object id is invalid', done => {
     const invalidID = 'abc'
-    request(app).patch(`/notes/${invalidID}`).expect(404).end(done)
+    request(app)
+      .patch(`/notes/${invalidID}`)
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(404)
+      .end(done)
   })
 
   it('should return 404 if note not found', done => {
     const hexId = new ObjectID().toHexString()
 
-    request(app).patch(`/notes/${hexId}`).expect(404).end(done)
+    request(app)
+      .patch(`/notes/${hexId}`)
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(404)
+      .end(done)
   })
 })
 
