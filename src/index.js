@@ -1,3 +1,5 @@
+/* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
+
 import { env, logger } from './config/config'
 
 import express from 'express'
@@ -9,7 +11,7 @@ import _ from 'lodash'
 
 import './db/mongoose'
 
-import Note from './models/note'
+import { Note } from './models/note'
 import { User } from './models/user'
 import { authenticate } from './middleware/authenticate'
 
@@ -32,9 +34,10 @@ app.get('/', (req, res) => {
 })
 
 // POST /notes
-app.post('/notes', (req, res) => {
+app.post('/notes', authenticate, (req, res) => {
   const note = new Note({
-    content: req.body.content
+    content: req.body.content,
+    _creator: req.user._id
   })
 
   note.save().then(
@@ -48,8 +51,10 @@ app.post('/notes', (req, res) => {
 })
 
 // GET /notes
-app.get('/notes', (req, res) => {
-  Note.find({}).then(
+app.get('/notes', authenticate, (req, res) => {
+  Note.find({
+    _creator: req.user._id
+  }).then(
     notes => {
       res.json({ notes })
     },
@@ -60,14 +65,17 @@ app.get('/notes', (req, res) => {
 })
 
 // GET /notes/:id
-app.get('/notes/:id', (req, res) => {
+app.get('/notes/:id', authenticate, (req, res) => {
   const { id } = req.params
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send()
   }
 
-  Note.findOne({ _id: id })
+  Note.findOne({
+    _id: id,
+    _creator: req.user._id
+  })
     .then(note => {
       if (!note) {
         return res.status(404).send()
@@ -81,14 +89,17 @@ app.get('/notes/:id', (req, res) => {
 })
 
 // DELETE /notes/:id
-app.delete('/notes/:id', (req, res) => {
+app.delete('/notes/:id', authenticate, (req, res) => {
   const { id } = req.params
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send()
   }
 
-  Note.findOneAndRemove({ _id: id })
+  Note.findOneAndRemove({
+    _id: id,
+    _creator: req.user._id
+  })
     .then(note => {
       if (!note) {
         return res.status(404).send()
@@ -101,7 +112,7 @@ app.delete('/notes/:id', (req, res) => {
 })
 
 // PATCH /notes/:id
-app.patch('/notes/:id', (req, res) => {
+app.patch('/notes/:id', authenticate, (req, res) => {
   const { id } = req.params
   const body = _.pick(req.body, ['content', 'public'])
 
@@ -109,7 +120,14 @@ app.patch('/notes/:id', (req, res) => {
     return res.status(404).send()
   }
 
-  Note.findOneAndUpdate({ _id: id }, { $set: body }, { new: true })
+  Note.findOneAndUpdate(
+    {
+      _id: id,
+      _creator: req.user._id
+    },
+    { $set: body },
+    { new: true }
+  )
     .then(note => {
       if (!note) {
         return res.status(404).send()
