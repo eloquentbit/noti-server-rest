@@ -6,6 +6,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import morgan from 'morgan'
+import compression from 'compression'
 import { ObjectID } from 'mongodb'
 import _ from 'lodash'
 
@@ -18,6 +19,8 @@ import { authenticate } from './middleware/authenticate'
 const PORT = env.PORT || 8080
 
 const app = express()
+
+app.use(compression())
 
 app.use(cors())
 app.use(
