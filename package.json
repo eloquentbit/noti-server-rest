@@ -24,7 +24,7 @@
     "jsonwebtoken": "^7.4.3",
     "lodash": "^4.17.4",
     "mongodb": "^2.2.31",
-    "mongoose": "^4.11.5",
+    "mongoose": "^5.7.5",
     "morgan": "^1.8.2",
     "rimraf": "^2.6.1",
     "validator": "^8.1.0",
